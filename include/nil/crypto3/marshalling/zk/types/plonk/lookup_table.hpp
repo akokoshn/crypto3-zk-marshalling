@@ -136,6 +136,23 @@ namespace nil {
                     return filled_tables;
                 }
 
+                template<typename Endianness, typename PlonkTable, typename InputRange>
+                plonk_lookup_tables<nil::marshalling::field_type<Endianness>, PlonkTable>
+                fill_plonk_lookup_tables(const InputRange &tables, const std::set<std::uint32_t>& used_tables) {
+                    using TTypeBase = nil::marshalling::field_type<Endianness>;
+                    using result_type = nil::marshalling::types::array_list<
+                            TTypeBase, plonk_lookup_table<TTypeBase, PlonkTable>,
+                            nil::marshalling::option::sequence_size_field_prefix<
+                                    nil::marshalling::types::integral<TTypeBase, std::size_t>>>;
+
+                    result_type filled_tables;
+                    for (const auto &table : used_tables) {
+                        filled_tables.value().push_back(fill_plonk_lookup_table<Endianness, PlonkTable>(tables[table]));
+                    }
+
+                    return filled_tables;
+                }
+
                 template<typename Endianness, typename PlonkTable>
                 std::vector<PlonkTable> make_plonk_lookup_tables(
                     const plonk_lookup_tables<nil::marshalling::field_type<Endianness>, PlonkTable> &filled_tables) {

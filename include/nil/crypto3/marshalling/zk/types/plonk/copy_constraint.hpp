@@ -83,6 +83,22 @@ namespace nil {
                 }
 
                 template<typename Endianness, typename FieldType>
+                plonk_copy_constraints<nil::marshalling::field_type<Endianness>,  FieldType>
+                fill_plonk_copy_constraints(const std::vector< nil::crypto3::zk::snark::plonk_copy_constraint<FieldType>> &constraints,
+                                            const std::set<std::uint32_t>& used_constraints) {
+                    using TTypeBase = nil::marshalling::field_type<Endianness>;
+
+                    plonk_copy_constraints<TTypeBase, FieldType> filled_constraints;
+                    for (const auto &constraint : used_constraints) {
+                        filled_constraints.value().push_back(
+                                fill_plonk_copy_constraint< Endianness, FieldType>(constraints[constraint])
+                        );
+                    }
+
+                    return filled_constraints;
+                }
+
+                template<typename Endianness, typename FieldType>
                 std::vector< nil::crypto3::zk::snark::plonk_copy_constraint<FieldType> >
                 make_plonk_copy_constraints(
                     const plonk_copy_constraints<nil::marshalling::field_type<Endianness>, FieldType> &filled_constraints

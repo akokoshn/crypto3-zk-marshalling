@@ -122,6 +122,23 @@ namespace nil {
                     return filled_gates;
                 }
 
+                template<typename Endianness, typename PlonkGate, typename InputRange>
+                plonk_lookup_gates<nil::marshalling::field_type<Endianness>, PlonkGate>
+                fill_plonk_lookup_gates(const InputRange &gates, const std::set<std::uint32_t>& used_gates) {
+                    using TTypeBase = nil::marshalling::field_type<Endianness>;
+                    using result_type = nil::marshalling::types::array_list<
+                            TTypeBase, plonk_lookup_gate<TTypeBase, PlonkGate>,
+                            nil::marshalling::option::sequence_size_field_prefix<
+                                    nil::marshalling::types::integral<TTypeBase, std::size_t>>>;
+
+                    result_type filled_gates;
+                    for (const auto &gate : used_gates) {
+                        filled_gates.value().push_back(fill_plonk_lookup_gate<Endianness, PlonkGate>(gates[gate]));
+                    }
+
+                    return filled_gates;
+                }
+
                 template<typename Endianness, typename PlonkGate>
                 std::vector<PlonkGate> make_plonk_lookup_gates(
                     const plonk_lookup_gates<nil::marshalling::field_type<Endianness>, PlonkGate> &filled_gates) {

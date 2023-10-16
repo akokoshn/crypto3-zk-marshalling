@@ -91,6 +91,43 @@ namespace nil {
                         fill_field_element_vector<typename PlonkTable::field_type::value_type, Endianness>(table_values)
                     ));
                 }
+
+                template<typename Endianness, typename PlonkTable>
+                plonk_assignment_table<nil::marshalling::field_type<Endianness>, PlonkTable> fill_assignment_table(
+                        const std::set<std::uint32_t>& usable_rows,
+                        const PlonkTable &assignments
+                ){
+                    using TTypeBase = nil::marshalling::field_type<Endianness>;
+                    using result_type = plonk_assignment_table<nil::marshalling::field_type<Endianness>, PlonkTable>;
+
+                    std::vector<typename PlonkTable::field_type::value_type> table_values;
+                    for( std::size_t i = 0; i < PlonkTable::arithmetization_params::witness_columns; i++ ){
+                        for( const auto& j : usable_rows ){
+                            table_values.push_back(assignments.witness(i)[j]);
+                        }
+                    }
+                    for( std::size_t i = 0; i < PlonkTable::arithmetization_params::public_input_columns; i++ ){
+                        for( const auto& j : usable_rows ){
+                            table_values.push_back(assignments.public_input(i)[j]);
+                        }
+                    }
+                    for( std::size_t i = 0; i < PlonkTable::arithmetization_params::constant_columns; i++ ){
+                        for( const auto& j : usable_rows ){
+                            table_values.push_back(assignments.constant(i)[j]);
+                        }
+                    }
+                    for( std::size_t i = 0; i < PlonkTable::arithmetization_params::selector_columns; i++ ){
+                        for( const auto& j : usable_rows ){
+                            table_values.push_back(assignments.selector(i)[j]);
+                        }
+                    }
+                    return result_type(std::make_tuple(
+                            nil::marshalling::types::integral<TTypeBase, std::size_t>(usable_rows.size()),
+                            nil::marshalling::types::integral<TTypeBase, std::size_t>(PlonkTable::arithmetization_params::total_columns),
+                            fill_field_element_vector<typename PlonkTable::field_type::value_type, Endianness>(table_values)
+                    ));
+                }
+
                 template<typename Endianness, typename PlonkTable>
                 std::pair<std::size_t, PlonkTable> make_assignment_table(const plonk_assignment_table<nil::marshalling::field_type<Endianness>, PlonkTable> filled_assignments){
                     BOOST_ASSERT(PlonkTable::arithmetization_params::total_columns == std::get<1>(filled_assignments.value()).value());

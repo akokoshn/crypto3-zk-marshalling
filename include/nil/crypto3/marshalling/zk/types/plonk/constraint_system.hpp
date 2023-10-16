@@ -72,7 +72,25 @@ namespace nil {
                         fill_plonk_lookup_gates<Endianness, typename PlonkConstraintSystem::lookup_gates_container_type::value_type>(system.lookup_gates()),
                         fill_plonk_lookup_tables<Endianness, typename PlonkConstraintSystem::lookup_tables_type::value_type>(system.lookup_tables())
                     ));
-                }  
+                }
+
+                template<typename Endianness, typename PlonkConstraintSystem>
+                plonk_constraint_system<nil::marshalling::field_type<Endianness>, PlonkConstraintSystem>
+                fill_plonk_constraint_system(const PlonkConstraintSystem &system,
+                                             const std::set<std::uint32_t>& used_gates,
+                                             const std::set<std::uint32_t>& used_copy_constraints,
+                                             const std::set<std::uint32_t>& used_lookup_gates,
+                                             const std::set<std::uint32_t>& used_lookup_tables) {
+                    using TTypeBase = nil::marshalling::field_type<Endianness>;
+                    using result_type = plonk_constraint_system<nil::marshalling::field_type<Endianness>, PlonkConstraintSystem>;
+
+                    return result_type(std::make_tuple(
+                            fill_plonk_gates<Endianness, typename PlonkConstraintSystem::gates_container_type::value_type>(system.gates(), used_gates),
+                            fill_plonk_copy_constraints<Endianness, typename PlonkConstraintSystem::field_type>(system.copy_constraints(), used_copy_constraints),
+                            fill_plonk_lookup_gates<Endianness, typename PlonkConstraintSystem::lookup_gates_container_type::value_type>(system.lookup_gates(), used_lookup_gates),
+                            fill_plonk_lookup_tables<Endianness, typename PlonkConstraintSystem::lookup_tables_type::value_type>(system.lookup_tables(), used_lookup_tables)
+                    ));
+                }
 
                 template<typename Endianness, typename PlonkConstraintSystem>
                 PlonkConstraintSystem
